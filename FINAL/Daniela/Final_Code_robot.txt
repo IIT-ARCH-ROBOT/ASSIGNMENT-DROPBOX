@@ -1,0 +1,261 @@
+#include <Wire.h>
+
+#include <Servo.h>
+
+#include <Adafruit_NeoPixel.h>
+
+#include "musical_notes.h"
+
+
+//SENSOR DISTANCIA
+#define echoPin 7
+#define trigPin 8 
+int maximumRange=200;
+int minimumRange=0;
+long duration,distance;
+
+
+//BUZZER
+
+int speakerPin = 3; // speaker connected to digital pin 3
+
+//RGB NEOPIXEL
+
+#define PIN 6
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
+int maxBrightness = 140;
+int minBrightness = 50;
+int fadeSpeed1 = 5;
+int fadeSpeed2=2;
+
+//BOTAO
+
+const int  buttonPin = 11;
+int buttonState = 0;
+int pos;                // variable to store the servo position
+long timeDelay;
+int lastButtonState=0;
+int buttonPushCounter=0;
+
+//SERVO
+int servo=0;
+
+Servo myservo;  // create servo object to control a servo
+                            
+
+void setup(){
+
+  pinMode(speakerPin, OUTPUT);
+  pinMode(trigPin,OUTPUT);
+  pinMode(echoPin,INPUT);
+  pinMode(buttonPin, INPUT);
+  strip.begin();
+  strip.show();
+  Wire.begin();
+  Serial.begin(9600);
+ }
+
+void loop() {
+  // put your main code here, to run repeatedly
+  if(buttonState==LOW){
+    digitalWrite(trigPin, LOW); 
+ delayMicroseconds(2); 
+
+ digitalWrite(trigPin, HIGH);
+ delayMicroseconds(10); 
+ 
+ digitalWrite(trigPin, LOW);
+ 
+duration=pulseIn(echoPin,HIGH);
+distance=duration/58.2;
+Serial.println("distance=");
+Serial.print(distance);
+    Serial.println("distance");
+    Serial.print(distance);
+
+        if(distance>300 && distance<200){
+             pulseColor(strip.Color(0, 0, 255), fadeSpeed1);
+              off(); 
+
+          }
+        if(distance>50 && distance<300){
+            pulseColor(strip.Color(0, 0, 255), fadeSpeed2);
+             off();                    
+
+          }
+}
+
+buttonState = digitalRead(buttonPin);  // Read the button position
+if(buttonState!=lastButtonState){
+ 
+         if (buttonState == HIGH) {
+        red();
+        
+        buttonPushCounter++;
+      }
+
+    
+      delay(50);
+             
+  lastButtonState=buttonState;
+  }
+    
+if(buttonPushCounter<4){
+  myservo.detach();
+      delay(15);
+                  
+}
+       
+          else {
+          
+            r2D2();
+            delay(500);                                               
+            myservo.attach(9);                                 
+           for(pos = 0; pos<=90; pos += 1) { // goes from 90 degrees to 20 degrees in 1 step                                   
+           myservo.write(pos);                        // tell servo to go to position in variable 'ONpos'
+           //timeDelay = random(15, 30);
+            delay(15);     
+           // randomize wait time for the servo to reach the position
+           
+        }
+                        pulseColor(strip.Color(0, 255, 0), fadeSpeed1);
+                        off();                    
+
+                        buttonPushCounter=0;
+      }
+      
+}
+
+void red() {
+    
+  //blink on
+  for (int i=0; i <= 50; i++){           // i is the pixel number. This forloop selects all the pixels between 0 - 50
+    strip.setPixelColor(i,255,0,0);  // the last 3 values are RGB values, red blue and green respectivly. Currently set to white, adjust these to change the color.
+    strip.show();                        //Sends the comand to the pixels to Light up in the specified code above.
+  }
+  delay (100);                           //delay of half a second
+  
+//  blink off
+ for (int i=0; i <= 50; i++){           // i is the pixel number. This forloop selects all the pixels between 0 - 5
+  strip.setPixelColor(i,0,0,0);        // the last 3 values are RGB values, red blue and green respectivly. Currently set to off, adjust these to change the color.
+   strip.show();                        //Sends the comand to the pixels to Light up in the specified code above.
+ }
+  delay (100);                           //delay of half a second
+}
+
+void blue(){
+   //blink on
+  for (int i=0; i <= 50; i++){           // i is the pixel number. This forloop selects all the pixels between 0 - 50
+    strip.setPixelColor(i,0,0,255);  // the last 3 values are RGB values, red blue and green respectivly. Currently set to white, adjust these to change the color.
+    strip.show();                        //Sends the comand to the pixels to Light up in the specified code above.
+  }
+  delay (100);                           //delay of half a second
+  
+//  blink off
+ for (int i=0; i <= 50; i++){           // i is the pixel number. This forloop selects all the pixels between 0 - 5
+  strip.setPixelColor(i,0,0,0);        // the last 3 values are RGB values, red blue and green respectivly. Currently set to off, adjust these to change the color.
+   strip.show();                        //Sends the comand to the pixels to Light up in the specified code above.
+ }
+  delay (100);                           //delay of half a second
+}
+  
+
+
+void pulseColor(uint32_t c, uint8_t wait) {
+  //Increase Brightness / Fade In
+  for(int i=minBrightness; i<maxBrightness; i++) {
+      strip.setBrightness(i);
+      for(int x=0; x<strip.numPixels(); x++){
+        strip.setPixelColor(x,c);
+      }
+      strip.show();
+      delay(15);
+  }
+  //Lower Brightness / Fade Out
+  for(int i=maxBrightness; i>minBrightness; i--) {
+       strip.setBrightness(i);
+      for(int x=0; x<strip.numPixels(); x++){
+        strip.setPixelColor(x,c);
+      }
+      strip.show();
+      delay(15);
+  }
+}
+
+void green(){
+   //blink on
+  for (int i=0; i <= 50; i++){           // i is the pixel number. This forloop selects all the pixels between 0 - 50
+    strip.setPixelColor(i,0,255,0);  // the last 3 values are RGB values, red blue and green respectivly. Currently set to white, adjust these to change the color.
+    strip.show();                        //Sends the comand to the pixels to Light up in the specified code above.
+  }
+  delay (100);                           //delay of half a second
+  
+//  blink off
+ for (int i=0; i <= 50; i++){           // i is the pixel number. This forloop selects all the pixels between 0 - 5
+  strip.setPixelColor(i,0,0,0);        // the last 3 values are RGB values, red blue and green respectivly. Currently set to off, adjust these to change the color.
+   strip.show();                        //Sends the comand to the pixels to Light up in the specified code above.
+ }
+  delay (100);                           //delay of half a second
+}
+
+void off(){
+   for (int i=0; i <= 50; i++){           // i is the pixel number. This forloop selects all the pixels between 0 - 5
+  strip.setPixelColor(i,0,0,0);        // the last 3 values are RGB values, red blue and green respectivly. Currently set to off, adjust these to change the color.
+   strip.show();                        //Sends the comand to the pixels to Light up in the specified code above.
+ }
+  delay (15);                           //delay of half a second
+
+}
+
+void beep (int speakerPin, float noteFrequency, long noteDuration)
+{    
+  int x;
+  // Convert the frequency to microseconds
+  float microsecondsPerWave = 1000000/noteFrequency;
+  // Calculate how many HIGH/LOW cycles there are per millisecond
+  float millisecondsPerCycle = 1000/(microsecondsPerWave * 2);
+  // Multiply noteDuration * number or cycles per millisecond
+  float loopTime = noteDuration * millisecondsPerCycle;
+  // Play the note for the calculated loopTime.
+  for (x=0;x<loopTime;x++)   
+          {   
+              digitalWrite(speakerPin,HIGH); 
+              delayMicroseconds(microsecondsPerWave); 
+              digitalWrite(speakerPin,LOW); 
+              delayMicroseconds(microsecondsPerWave); 
+          } 
+}     
+     
+
+void r2D2(){
+          beep(speakerPin, note_A7,100); //A 
+          beep(speakerPin, note_G7,100); //G 
+          beep(speakerPin, note_E7,100); //E 
+          beep(speakerPin, note_C7,100); //C
+          beep(speakerPin, note_D7,100); //D 
+          beep(speakerPin, note_B7,100); //B 
+          beep(speakerPin, note_F7,100); //F 
+          beep(speakerPin, note_C8,100); //C 
+          beep(speakerPin, note_A7,100); //A 
+          beep(speakerPin, note_G7,100); //G 
+          beep(speakerPin, note_E7,100); //E 
+          beep(speakerPin, note_C7,100); //C
+          beep(speakerPin, note_D7,100); //D 
+          beep(speakerPin, note_B7,100); //B 
+          beep(speakerPin, note_F7,100); //F 
+          beep(speakerPin, note_C8,100); //C 
+}
+
+void angry(){
+ tone(speakerPin, 32, 3833.0);
+    delay(100);
+    delay(4.44444444444);
+    tone(speakerPin, 0, 0);
+    delay(100);
+     tone(speakerPin, 35, 4000);
+    delay(100);
+    delay(4.44444444444);
+    tone(speakerPin, 0, 0);
+    delay(100);
+     
+    }
